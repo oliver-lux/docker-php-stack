@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# Available commands
+commands="composer bun chown backup artisan clean"
+
+composer_cmd() {
+   docker compose exec -u application app composer "$@"
+}
+
+bun_cmd() {
+   docker compose run --rm -P bun-node bun "$@"
+}
+
+chown_cmd() {
+  sudo chown -R oliver:oliver *
+  sudo find . -type d -exec chmod 0755 '{}' + -or -type f -exec chmod 0644 '{}' +
+}
+
+backup_cmd() {
+  backup_dir="./backup"
+  backup_file="$backup_dir/$(date +%y%m%d)-backup.tar.gz"
+  mkdir -p "$backup_dir"
+  tar -czf "$backup_file" --exclude="$backup_dir" --exclude-vcs-ignores "$@" . .env src/.env src/vendor
+  echo "Backup created: $backup_file"
+}
+
+artisan_cmd() {
+   docker compose exec -u application app php artisan "$@"
+}
+
+clean_cmd() {
+  echo "Cleaning the Laravel application cache, logs, and compiled views..."
+  artisan_cmd cache:clear
+  artisan_cmd config:clear
+  artisan_cmd route:clear
+  artisan_cmd view:clear
+  artisan_cmd clear-compiled
+  echo "Removing all logs..."
+  rm -rf src/storage/logs/*
+  echo "Laravel application cleaned."
+}
+
+# Print usage message
+print_usage() {
+  echo "Usage: $0 [command] [args]"
+  echo "Available commands: $commands"
+  exit 1
+}
+
+# Execute the specified command
+run_command() {
+  local cmd=$1
+  shift
+  if printf '%s\n' $commands | grep -q -w "$cmd"; then
+    "${cmd}_cmd" "$@"
+  else
+    echo "Unknown command: $cmd"
+  fi
+}
+
+# Main
+if [ $# -lt 1 ]; then
+  print_usage
+fi
+
+cmd=$1
+shift
+
+if printf '%s' "$commands" | grep -q -w "$cmd"; then
+  run_command "$cmd" "$@"
+else
+  echo "Unknown command: $cmd"
+  print_usage
+fi

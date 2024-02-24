@@ -1,0 +1,28 @@
+# compose.override.yml
+services:
+  # main runtime
+  bun-node:
+    image: oven/bun:alpine
+    environment: [TZ, NODE_ENV=devlopment]
+    volumes: [./src:/app]
+    ports: [5173:5173]
+    working_dir: /app
+    user: "1000"
+    tty: true
+  # backup runtime
+  node:
+    image: node:21-alpine
+    environment: [TZ]
+    volumes: [./src:/app]
+    ports: [8000:8000]
+    working_dir: /app
+    user: "1000"
+    tty: true
+
+  npm:
+    extends: node
+    entrypoint: ["npm", "--no-update-notifier"]
+
+  yarn:
+    extends: node
+    entrypoint: ["yarn"]
