@@ -1,45 +1,55 @@
-# compose.yml
-networks: { reverse-proxy: { external: true } }
-volumes: { mysql, redis }
+version: "3"
+
+networks:
+    default:
+    # reverse-proxy: { external: true }
+
+volumes:
+    mysql:
+    redis:
 
 services:
-  app:
-    build: ./config
-    restart: unless-stopped
-    environment:
-      TZ: ${TZ:-UTC}
-      PHP_DISMOD:
-      PHP_OPCACHE_VALIDATE_TIMESTAMPS:
-      PHP_DATE_TIMEZONE: ${TZ:-UTC}
-      WEB_DOCUMENT_ROOT: ${WEB_DOCUMENT_ROOT:-/app/public}
-      COMPOSER_NO_DEV:
-    volumes: [./src:/app]
-    ports: [8200:80]
-    working_dir: /app
-    networks: [default, reverse-proxy]
-    depends_on: [db, redis]
-    tty: true
+    app:
+        build: ./config
+        restart: unless-stopped
+        environment:
+            TZ: ${TZ:-UTC}
+            PHP_DATE_TIMEZONE: ${TZ:-UTC}
+            WEB_DOCUMENT_ROOT: ${WEB_DOCUMENT_ROOT:-/app/public}
+            PHP_DISMOD:
+            COMPOSER_NO_DEV:
+            PHP_OPCACHE_VALIDATE_TIMESTAMPS:
+        volumes:
+            - ./src:/app
+        ports:
+            - "8200:80"
+        working_dir: /app
+        networks:
+            - default
+        # - reverse-proxy
+        depends_on:
+            - db
+            - redis
+        tty: true
 
-  db:
-    image: mariadb:lts-jammy
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE:
-      MYSQL_USER:
-      MYSQL_PASSWORD:
-      MYSQL_RANDOM_ROOT_PASSWORD: 1
-    volumes: [mysql:/var/lib/mysql]
-    tty: true
+    db:
+        image: mariadb:lts-jammy
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DATABASE_NAME:-app}
+            MYSQL_USER: ${DATABASE_USER:-admin}
+            MYSQL_PASSWORD: ${DATABASE_PASS:-secret}
+            MYSQL_RANDOM_ROOT_PASSWORD: 1
+            TZ: ${TZ:-UTC}
+        volumes:
+            - mysql:/var/lib/mysql
+        tty: true
 
-  redis:
-    image: redis:alpine
-    restart: unless-stopped
-    environment: [TZ]
-    volumes: [redis:/data]
-    tty: true
-
-  mailpit:
-    image: axllent/mailpit:latest
-    environment: [TZ]
-    ports: [8025:8025]
-    expose: [1025:1025]
+    redis:
+        image: redis:alpine
+        restart: unless-stopped
+        environment:
+            TZ: ${TZ:-UTC}
+        volumes:
+            - redis:/data
+        tty: true
