@@ -35,7 +35,7 @@ Run the following commands:
     # use bash script to access container
     sh fire composer create-project --prefer-dist laravel/laravel .
 
-## Install filament
+## Install (Laravel) Filament
 
     sh fire composer require filament/filament
 
