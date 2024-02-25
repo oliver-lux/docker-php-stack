@@ -21,7 +21,7 @@ To prevent Git from tracking changes to a specific subfolder, such as src/public
 
 Execute the following command to instruct Git to ignore changes within the src/public directory:
 
-    git update-index --assume-unchanged src/public/*
+    git update-index --assume-unchanged src/public/index.php
 
 ## Installing Laravel
 
