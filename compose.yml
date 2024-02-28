@@ -1,14 +1,7 @@
 version: "3"
 
-networks:
-    default:
-    # reverse-proxy: { external: true }
-
-volumes:
-    mysql:
-    redis:
-
 services:
+    # Nginx and PHP-FPM service
     app:
         build: ./config
         restart: unless-stopped
@@ -24,14 +17,11 @@ services:
         ports:
             - "${APP_HOST_PORT:-8080}:80"
         working_dir: /app
-        networks:
-            - default
-        # - reverse-proxy
         depends_on:
             - db
             - redis
         tty: true
-
+    # MariaDB service
     db:
         image: mariadb:lts-jammy
         restart: unless-stopped
@@ -44,7 +34,7 @@ services:
         volumes:
             - mysql:/var/lib/mysql
         tty: true
-
+    # Redis service
     redis:
         image: redis:alpine
         restart: unless-stopped
@@ -53,3 +43,8 @@ services:
         volumes:
             - redis:/data
         tty: true
+
+# Persistent data volumes
+volumes:
+    mysql:
+    redis:

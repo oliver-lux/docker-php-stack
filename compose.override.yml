@@ -1,5 +1,7 @@
-# compose.override.yml
+version: "3"
+
 services:
+    # can be used to test mail sending
     mailpit:
         image: axllent/mailpit:latest
         environment:
@@ -22,7 +24,7 @@ services:
         user: "1000"
         profiles: ["dev"]
         tty: true
-    # backup runtime (if bun fails..)
+    # backup runtime if bun fails
     node:
         image: node:21-alpine
         environment:
@@ -33,11 +35,11 @@ services:
         user: "1000"
         profiles: ["dev"]
         tty: true
-
+    # shortcut to run npm commands
     npm:
         extends: node
         entrypoint: ["npm", "--no-update-notifier"]
-
+    # shortcut to run yarn commands
     yarn:
         extends: node
         entrypoint: ["yarn"]
