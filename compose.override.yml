@@ -1,8 +1,5 @@
 # compose.override.yml
 services:
-    app:
-        ports:
-            - "8200:80"
     mailpit:
         image: axllent/mailpit:latest
         environment:
@@ -11,6 +8,7 @@ services:
             - "8025:8025"
         expose:
             - "1025"
+        profiles: ["dev"]
         tty: true
     # main runtime
     bun-node:
@@ -22,8 +20,9 @@ services:
         ports: [5173:5173]
         working_dir: /app
         user: "1000"
+        profiles: ["dev"]
         tty: true
-    # backup runtime
+    # backup runtime (if bun fails..)
     node:
         image: node:21-alpine
         environment:
@@ -32,6 +31,7 @@ services:
         ports: [8000:8000]
         working_dir: /app
         user: "1000"
+        profiles: ["dev"]
         tty: true
 
     npm:
