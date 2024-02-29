@@ -49,6 +49,7 @@ print_usage() {
 
 # Execute the specified command
 run_command() {
+  cd "$(dirname "$0")"
   local cmd=$1
   shift
   if printf '%s\n' $commands | grep -q -w "$cmd"; then
