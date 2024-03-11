@@ -1,26 +1,26 @@
 version: "3"
 
 services:
-    # Nginx and PHP-FPM service
     app:
-        build: ./config
-        restart: unless-stopped
+        image: lscr.io/linuxserver/nginx:1.24.0
         environment:
-            TZ: ${TZ:-UTC}
-            PHP_DATE_TIMEZONE: ${TZ:-UTC}
-            WEB_DOCUMENT_ROOT: ${WEB_DOCUMENT_ROOT:-/app/public}
-            PHP_DISMOD:
+            PUID: 1000
+            PGID: 1000
+            TZ: Europe/Berlin
             COMPOSER_NO_DEV:
-            PHP_OPCACHE_VALIDATE_TIMESTAMPS:
         volumes:
-            - ./src:/app
+            - ./src:/config/www
+            - ./nginx/default.conf:/config/nginx/site-confs/default.conf
         ports:
-            - "${APP_HOST_PORT:-8080}:80"
-        working_dir: /app
+            - 80:80
+            # - 443:443
+        restart: unless-stopped
+        working_dir: /config/www
         depends_on:
-            - db
             - redis
+            - db
         tty: true
+
     # MariaDB service
     db:
         image: mariadb:lts-jammy
