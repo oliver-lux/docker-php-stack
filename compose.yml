@@ -6,22 +6,19 @@ services:
         environment:
             PUID: 1000
             PGID: 1000
-            TZ: Europe/Berlin
-            COMPOSER_NO_DEV:
+            TZ: Europe/Paris
+            COMPOSER_NO_DEV: 1
         volumes:
             - ./src:/config/www
             - ./nginx/default.conf:/config/nginx/site-confs/default.conf
-        ports:
-            - 80:80
-            # - 443:443
         restart: unless-stopped
         working_dir: /config/www
         depends_on:
-            - redis
             - db
+            - redis
         tty: true
 
-    # MariaDB service
+    # SQL service
     db:
         image: mariadb:lts-jammy
         restart: unless-stopped
@@ -34,7 +31,8 @@ services:
         volumes:
             - mysql:/var/lib/mysql
         tty: true
-    # Redis service
+
+    # Cache service
     redis:
         image: redis:alpine
         restart: unless-stopped
@@ -42,6 +40,31 @@ services:
             TZ: ${TZ:-UTC}
         volumes:
             - redis:/data
+        tty: true
+
+    # Node runtime
+    bun-node:
+        image: oven/bun:alpine
+        environment:
+            TZ: ${TZ:-UTC}
+            NODE_ENV: development
+        volumes: [./src:/app]
+        ports: [5173:5173]
+        working_dir: /app
+        user: "1000"
+        profiles: ["dev"]
+        tty: true
+
+    # SMTP testing
+    mailpit:
+        image: axllent/mailpit:latest
+        environment:
+            TZ: ${TZ:-UTC}
+        ports:
+            - "8025:8025"
+        expose:
+            - "1025"
+        profiles: ["dev"]
         tty: true
 
 # Persistent data volumes

@@ -1,45 +1,10 @@
-version: "3"
-
 services:
-    # can be used to test mail sending
-    mailpit:
-        image: axllent/mailpit:latest
+    app:
         environment:
-            TZ: ${TZ:-UTC}
+            COMPOSER_NO_DEV: 0
+        volumes:
+            - ./src:/config/www
+            - ./nginx/default.conf:/config/nginx/site-confs/default.conf
         ports:
-            - "8025:8025"
-        expose:
-            - "1025"
-        profiles: ["dev"]
-        tty: true
-    # main runtime
-    bun-node:
-        image: oven/bun:alpine
-        environment:
-            TZ: ${TZ:-UTC}
-            NODE_ENV: development
-        volumes: [./src:/app]
-        ports: [5173:5173]
-        working_dir: /app
-        user: "1000"
-        profiles: ["dev"]
-        tty: true
-    # backup runtime if bun fails
-    node:
-        image: node:21-alpine
-        environment:
-            TZ: ${TZ:-UTC}
-        volumes: [./src:/app]
-        ports: [8000:8000]
-        working_dir: /app
-        user: "1000"
-        profiles: ["dev"]
-        tty: true
-    # shortcut to run npm commands
-    npm:
-        extends: node
-        entrypoint: ["npm", "--no-update-notifier"]
-    # shortcut to run yarn commands
-    yarn:
-        extends: node
-        entrypoint: ["yarn"]
+            - 80:80
+            - 443:443

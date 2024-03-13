@@ -1,8 +1,7 @@
-version: "3"
-
 services:
     app:
         networks:
+            - default
             - reverse-proxy
 
 networks:

@@ -42,3 +42,7 @@ Run the following commands:
     php artisan migrate
     php artisan filament:install --panels
     php artisan filament:user
+
+## Install node modules
+
+    sh fire bun install
